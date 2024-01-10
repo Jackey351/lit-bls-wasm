@@ -58,7 +58,7 @@ htmlPartTemplate = """
 
 
 
-export async function initWasmBlsSdk() {
+exports.initWasmBlsSdk = async function () {
 var b = "";
 %s
 
@@ -143,7 +143,7 @@ to_remove_from_wasm_bridge = [
 ]
 
 scripts = [
-    'convert.js',
+    'convert.cjs',
     wasmJsFilePath,
 ]
 
