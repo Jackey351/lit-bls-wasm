@@ -131,14 +131,14 @@ page = ""
 
 to_remove_from_wasm_bridge = [
     """
-    if (typeof input === 'undefined') {
-        input = new URL('%s', import.meta.url);
-    }
+                    if (typeof input === 'undefined') {
+                        input = new URL('%s', import.meta.url);
+                    }
 """ % wasmFileName,
     """
-    if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
-        input = fetch(input);
-    }
+                    if (typeof input === 'string' || (typeof Request === 'function' && input instanceof Request) || (typeof URL === 'function' && input instanceof URL)) {
+                        input = fetch(input);
+                    }
 """
 ]
 
