@@ -107,7 +107,7 @@ function getBase64Code(charCode) {
     return code;
 }
 
-exports.uint8ArrayToBase64 = function (bytes) {
+function uint8ArrayToBase64 (bytes) {
     let result = '', i, l = bytes.length;
     for (i = 2; i < l; i += 3) {
         result += base64abc[bytes[i - 2] >> 2];
@@ -128,8 +128,9 @@ exports.uint8ArrayToBase64 = function (bytes) {
     }
     return result;
 }
+exports.uint8ArrayToBase64 = uint8ArrayToBase64;
 
-exports.base64ToUint8Array = function (str) {
+function base64ToUint8Array(str) {
     if (str.length % 4 !== 0) {
         throw new Error("Unable to parse base64 string.");
     }
@@ -153,6 +154,7 @@ exports.base64ToUint8Array = function (str) {
     }
     return result.subarray(0, result.length - missingOctets);
 }
+exports.base64ToUint8Array = base64ToUint8Array;
 
 // export function base64encode(str, encoder = new TextEncoder()) {
 // 	return bytesToBase64(encoder.encode(str));

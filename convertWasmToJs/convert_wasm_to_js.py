@@ -61,7 +61,7 @@ htmlPartTemplate = """
 exports.initWasmBlsSdk = async function () {
 var b = "";
 %s
-
+    const pako = require("pako");
     var input = pako.inflate(base64ToUint8Array(b));
     return __wbg_init(input);
 }

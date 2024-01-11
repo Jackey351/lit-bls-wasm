@@ -51,188 +51,188 @@ pub fn encrypt_time_lock<C: BlsSignatureImpl + Serialize>(
     // serde_json::from_str::<PublicKey<C>>;
     let key = serde_json::from_str::<PublicKey<C>>(&quote(public_key))
         .map_err(|_e| "Failed to parse public key as a json hex string".to_string())?;
-    return Ok("".into());
-    // key.encrypt_time_lock(SignatureSchemes::ProofOfPossession, message, identity)
-    //     .map_err(|_e| "Unable to encrypt data".to_string())
-    //     .map(|ciphertext| {
-    //         let output = serde_bare::to_vec(&ciphertext).unwrap();
-    //         base64_encode_bytes(&output)
-    //     })
+    // return Ok("".into());
+    key.encrypt_time_lock(SignatureSchemes::ProofOfPossession, message, identity)
+        .map_err(|_e| "Unable to encrypt data".to_string())
+        .map(|ciphertext| {
+            let output = serde_bare::to_vec(&ciphertext).unwrap();
+            base64_encode_bytes(&output)
+        })
 }
 
-// #[wasm_bindgen]
-// #[doc = "Verifies the decryption shares are valid and decrypts the data."]
-// pub fn verify_and_decrypt_with_signature_shares(
-//     public_key: &str,
-//     identity: &str,
-//     ciphertext: &str,
-//     shares: JsValue,
-// ) -> Result<String, String> {
-//     let shares = serde_wasm_bindgen::from_value::<Vec<String>>(shares)
-//         .map_err(|_e| "Failed to parse shares".to_string())?;
+#[wasm_bindgen]
+#[doc = "Verifies the decryption shares are valid and decrypts the data."]
+pub fn verify_and_decrypt_with_signature_shares(
+    public_key: &str,
+    identity: &str,
+    ciphertext: &str,
+    shares: JsValue,
+) -> Result<String, String> {
+    let shares = serde_wasm_bindgen::from_value::<Vec<String>>(shares)
+        .map_err(|_e| "Failed to parse shares".to_string())?;
 
-//     if shares.len() < 2 {
-//         return Err("At least two shares are required".to_string());
-//     }
-//     let ciphertext = base64_decode(ciphertext);
-//     let identity = base64_decode(identity);
+    if shares.len() < 2 {
+        return Err("At least two shares are required".to_string());
+    }
+    let ciphertext = base64_decode(ciphertext);
+    let identity = base64_decode(identity);
 
-//     match public_key.len() {
-//         SIGNATURE_G2_PUBLIC_KEY_HEX_LENGTH => {
-//             verify_and_decrypt::<Bls12381G2Impl>(public_key, &identity, &ciphertext, &shares)
-//         }
-//         SIGNATURE_G1_PUBLIC_KEY_HEX_LENGTH => {
-//             verify_and_decrypt::<Bls12381G1Impl>(public_key, &identity, &ciphertext, &shares)
-//         }
-//         _ => Err("Invalid shares".to_string()),
-//     }
-// }
+    match public_key.len() {
+        SIGNATURE_G2_PUBLIC_KEY_HEX_LENGTH => {
+            verify_and_decrypt::<Bls12381G2Impl>(public_key, &identity, &ciphertext, &shares)
+        }
+        SIGNATURE_G1_PUBLIC_KEY_HEX_LENGTH => {
+            verify_and_decrypt::<Bls12381G1Impl>(public_key, &identity, &ciphertext, &shares)
+        }
+        _ => Err("Invalid shares".to_string()),
+    }
+}
 
-// pub fn verify_and_decrypt<C: BlsSignatureImpl + DeserializeOwned>(
-//     public_key: &str,
-//     identity: &[u8],
-//     ciphertext: &[u8],
-//     shares: &[String],
-// ) -> Result<String, String> {
-//     let key = serde_json::from_str::<PublicKey<C>>(&quote(public_key))
-//         .map_err(|_e| "Failed to hex decode public key".to_string())?;
-//     let signature = combine_signature_shares_inner::<C>(shares)?;
-//     signature
-//         .verify(&key, identity)
-//         .map_err(|_e| "Failed to verify signature".to_string())?;
-//     let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(ciphertext)
-//         .map_err(|_e| "Failed to hex decode ciphertext".to_string())?;
-//     Option::<Vec<u8>>::from(ciphertext.decrypt(&signature))
-//         .map(|c| base64_encode_bytes(&c))
-//         .ok_or_else(|| "Failed to decrypt".to_string())
-// }
+pub fn verify_and_decrypt<C: BlsSignatureImpl + DeserializeOwned>(
+    public_key: &str,
+    identity: &[u8],
+    ciphertext: &[u8],
+    shares: &[String],
+) -> Result<String, String> {
+    let key = serde_json::from_str::<PublicKey<C>>(&quote(public_key))
+        .map_err(|_e| "Failed to hex decode public key".to_string())?;
+    let signature = combine_signature_shares_inner::<C>(shares)?;
+    signature
+        .verify(&key, identity)
+        .map_err(|_e| "Failed to verify signature".to_string())?;
+    let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(ciphertext)
+        .map_err(|_e| "Failed to hex decode ciphertext".to_string())?;
+    Option::<Vec<u8>>::from(ciphertext.decrypt(&signature))
+        .map(|c| base64_encode_bytes(&c))
+        .ok_or_else(|| "Failed to decrypt".to_string())
+}
 
-// #[wasm_bindgen]
-// #[doc = "Decrypts the data with signature shares."]
-// pub fn decrypt_with_signature_shares(ciphertext: &str, shares: JsValue) -> Result<String, String> {
-//     let shares = serde_wasm_bindgen::from_value::<Vec<String>>(shares)
-//         .map_err(|_e| "Failed to parse shares".to_string())?;
+#[wasm_bindgen]
+#[doc = "Decrypts the data with signature shares."]
+pub fn decrypt_with_signature_shares(ciphertext: &str, shares: JsValue) -> Result<String, String> {
+    let shares = serde_wasm_bindgen::from_value::<Vec<String>>(shares)
+        .map_err(|_e| "Failed to parse shares".to_string())?;
 
-//     if shares.len() < 2 {
-//         return Err("At least two shares are required".to_string());
-//     }
+    if shares.len() < 2 {
+        return Err("At least two shares are required".to_string());
+    }
 
-//     let ciphertext = base64_decode(ciphertext);
+    let ciphertext = base64_decode(ciphertext);
 
-//     match shares[0].len() {
-//         SIGNATURE_G1_SHARE_HEX_LENGTH => decrypt_time_lock::<Bls12381G1Impl>(&ciphertext, &shares),
-//         SIGNATURE_G2_SHARE_HEX_LENGTH => decrypt_time_lock::<Bls12381G2Impl>(&ciphertext, &shares),
-//         _ => Err("Invalid shares".to_string()),
-//     }
-// }
+    match shares[0].len() {
+        SIGNATURE_G1_SHARE_HEX_LENGTH => decrypt_time_lock::<Bls12381G1Impl>(&ciphertext, &shares),
+        SIGNATURE_G2_SHARE_HEX_LENGTH => decrypt_time_lock::<Bls12381G2Impl>(&ciphertext, &shares),
+        _ => Err("Invalid shares".to_string()),
+    }
+}
 
-// pub fn decrypt_time_lock<C: BlsSignatureImpl + DeserializeOwned>(
-//     ciphertext: &[u8],
-//     shares: &[String],
-// ) -> Result<String, String> {
-//     let decryption_key = combine_signature_shares_inner::<C>(shares)?;
-//     let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(ciphertext)
-//         .map_err(|_e| "Failed to parse ciphertext".to_string())?;
-//     Option::<Vec<u8>>::from(ciphertext.decrypt(&decryption_key))
-//         .map(|c| base64_encode_bytes(&c))
-//         .ok_or_else(|| "Failed to decrypt".to_string())
-// }
+pub fn decrypt_time_lock<C: BlsSignatureImpl + DeserializeOwned>(
+    ciphertext: &[u8],
+    shares: &[String],
+) -> Result<String, String> {
+    let decryption_key = combine_signature_shares_inner::<C>(shares)?;
+    let ciphertext = serde_bare::from_slice::<TimeCryptCiphertext<C>>(ciphertext)
+        .map_err(|_e| "Failed to parse ciphertext".to_string())?;
+    Option::<Vec<u8>>::from(ciphertext.decrypt(&decryption_key))
+        .map(|c| base64_encode_bytes(&c))
+        .ok_or_else(|| "Failed to decrypt".to_string())
+}
 
-// #[wasm_bindgen]
-// #[doc = "Combines the signature shares into a single signature."]
-// pub fn combine_signature_shares(shares: JsValue) -> Result<String, String> {
-//     let shares = serde_wasm_bindgen::from_value::<Vec<String>>(shares)
-//         .map_err(|_e| "Failed to parse shares".to_string())?;
+#[wasm_bindgen]
+#[doc = "Combines the signature shares into a single signature."]
+pub fn combine_signature_shares(shares: JsValue) -> Result<String, String> {
+    let shares = serde_wasm_bindgen::from_value::<Vec<String>>(shares)
+        .map_err(|_e| "Failed to parse shares".to_string())?;
 
-//     if shares.len() < 2 {
-//         return Err("At least two shares are required".to_string());
-//     }
+    if shares.len() < 2 {
+        return Err("At least two shares are required".to_string());
+    }
 
-//     match shares[0].len() {
-//         SIGNATURE_G1_SHARE_HEX_LENGTH => combine_signature_shares_inner::<Bls12381G1Impl>(&shares)
-//             .map(|s| hex::encode(s.as_raw_value().to_bytes())),
-//         SIGNATURE_G2_SHARE_HEX_LENGTH => combine_signature_shares_inner::<Bls12381G2Impl>(&shares)
-//             .map(|s| hex::encode(s.as_raw_value().to_bytes())),
-//         _ => Err("Invalid shares".to_string()),
-//     }
-// }
+    match shares[0].len() {
+        SIGNATURE_G1_SHARE_HEX_LENGTH => combine_signature_shares_inner::<Bls12381G1Impl>(&shares)
+            .map(|s| hex::encode(s.as_raw_value().to_bytes())),
+        SIGNATURE_G2_SHARE_HEX_LENGTH => combine_signature_shares_inner::<Bls12381G2Impl>(&shares)
+            .map(|s| hex::encode(s.as_raw_value().to_bytes())),
+        _ => Err("Invalid shares".to_string()),
+    }
+}
 
-// pub fn combine_signature_shares_inner<C: BlsSignatureImpl + DeserializeOwned>(
-//     shares: &[String],
-// ) -> Result<Signature<C>, String> {
-//     let mut signature_shares = Vec::with_capacity(shares.len());
-//     for share in shares {
-//         let share = serde_json::from_str::<SignatureShare<C>>(share)
-//             .map_err(|_e| "Failed to parse share".to_string())?;
-//         signature_shares.push(share);
-//     }
-//     Signature::from_shares(&signature_shares)
-//         .map_err(|_e| format!("Failed to combine signature shares: {}", _e))
-// }
+pub fn combine_signature_shares_inner<C: BlsSignatureImpl + DeserializeOwned>(
+    shares: &[String],
+) -> Result<Signature<C>, String> {
+    let mut signature_shares = Vec::with_capacity(shares.len());
+    for share in shares {
+        let share = serde_json::from_str::<SignatureShare<C>>(share)
+            .map_err(|_e| "Failed to parse share".to_string())?;
+        signature_shares.push(share);
+    }
+    Signature::from_shares(&signature_shares)
+        .map_err(|_e| format!("Failed to combine signature shares: {}", _e))
+}
 
-// #[wasm_bindgen]
-// #[doc = "Verifies the signature."]
-// pub fn verify_signature(public_key: &str, message: &str, signature: &str) -> Result<(), String> {
-//     let message = base64_decode(message);
-//     let signature = base64_decode(signature);
-//     match public_key.len() {
-//         SIGNATURE_G2_PUBLIC_KEY_HEX_LENGTH => {
-//             verify_signature_inner_g2(public_key, &message, &signature)
-//         }
-//         SIGNATURE_G1_PUBLIC_KEY_HEX_LENGTH => {
-//             verify_signature_inner_g1(public_key, &message, &signature)
-//         }
-//         _ => Err("Invalid public key length. Must be 96 or 192 hexits.".to_string()),
-//     }
-// }
+#[wasm_bindgen]
+#[doc = "Verifies the signature."]
+pub fn verify_signature(public_key: &str, message: &str, signature: &str) -> Result<(), String> {
+    let message = base64_decode(message);
+    let signature = base64_decode(signature);
+    match public_key.len() {
+        SIGNATURE_G2_PUBLIC_KEY_HEX_LENGTH => {
+            verify_signature_inner_g2(public_key, &message, &signature)
+        }
+        SIGNATURE_G1_PUBLIC_KEY_HEX_LENGTH => {
+            verify_signature_inner_g1(public_key, &message, &signature)
+        }
+        _ => Err("Invalid public key length. Must be 96 or 192 hexits.".to_string()),
+    }
+}
 
-// pub fn verify_signature_inner_g2(
-//     public_key: &str,
-//     message: &[u8],
-//     signature: &[u8],
-// ) -> Result<(), String> {
-//     let key = serde_json::from_str::<PublicKey<Bls12381G2Impl>>(&quote(public_key))
-//         .map_err(|_e| "Failed to hex decode public key".to_string())?;
+pub fn verify_signature_inner_g2(
+    public_key: &str,
+    message: &[u8],
+    signature: &[u8],
+) -> Result<(), String> {
+    let key = serde_json::from_str::<PublicKey<Bls12381G2Impl>>(&quote(public_key))
+        .map_err(|_e| "Failed to hex decode public key".to_string())?;
 
-//     // The compressed signature of 96 bytes.
-//     let g2_projective = G2Projective::from_compressed(
-//         &signature
-//             .try_into()
-//             .map_err(|_e| "Failed to cast to compressed byte slice".to_string())?,
-//     )
-//     .unwrap();
-//     let signature: Signature<Bls12381G2Impl> = Signature::ProofOfPossession(g2_projective);
+    // The compressed signature of 96 bytes.
+    let g2_projective = G2Projective::from_compressed(
+        &signature
+            .try_into()
+            .map_err(|_e| "Failed to cast to compressed byte slice".to_string())?,
+    )
+    .unwrap();
+    let signature: Signature<Bls12381G2Impl> = Signature::ProofOfPossession(g2_projective);
 
-//     signature
-//         .verify(&key, message)
-//         .map_err(|_e| "Failed to verify signature".to_string())?;
+    signature
+        .verify(&key, message)
+        .map_err(|_e| "Failed to verify signature".to_string())?;
 
-//     Ok(())
-// }
+    Ok(())
+}
 
-// pub fn verify_signature_inner_g1(
-//     public_key: &str,
-//     message: &[u8],
-//     signature: &[u8],
-// ) -> Result<(), String> {
-//     let key = serde_json::from_str::<PublicKey<Bls12381G1Impl>>(&quote(public_key))
-//         .map_err(|_e| "Failed to hex decode public key".to_string())?;
+pub fn verify_signature_inner_g1(
+    public_key: &str,
+    message: &[u8],
+    signature: &[u8],
+) -> Result<(), String> {
+    let key = serde_json::from_str::<PublicKey<Bls12381G1Impl>>(&quote(public_key))
+        .map_err(|_e| "Failed to hex decode public key".to_string())?;
 
-//     // The compressed signature of 48 bytes.
-//     let g1_projective = G1Projective::from_compressed(
-//         &signature
-//             .try_into()
-//             .map_err(|_e| "Failed to cast to compressed byte slice".to_string())?,
-//     )
-//     .unwrap();
-//     let signature: Signature<Bls12381G1Impl> = Signature::ProofOfPossession(g1_projective);
+    // The compressed signature of 48 bytes.
+    let g1_projective = G1Projective::from_compressed(
+        &signature
+            .try_into()
+            .map_err(|_e| "Failed to cast to compressed byte slice".to_string())?,
+    )
+    .unwrap();
+    let signature: Signature<Bls12381G1Impl> = Signature::ProofOfPossession(g1_projective);
 
-//     signature
-//         .verify(&key, message)
-//         .map_err(|_e| "Failed to verify signature".to_string())?;
+    signature
+        .verify(&key, message)
+        .map_err(|_e| "Failed to verify signature".to_string())?;
 
-//     Ok(())
-// }
+    Ok(())
+}
 
 fn quote(s: &str) -> String {
     let mut ss = String::with_capacity(s.len() + 2);
